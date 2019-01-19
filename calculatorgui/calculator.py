@@ -1,3 +1,4 @@
+#Author: Avinash Kumar
 from tkinter import *
 import math
 class Calculator:
