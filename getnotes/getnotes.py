@@ -76,7 +76,11 @@ class Notepad:
 		
 		# To save current file 
 		self.__thisFileMenu.add_command(label="Save", 
-										command=self.__saveFile)	 
+										command=self.__saveFile)
+		
+		#To close the current file
+		# self.__thisFileMenu.add_command(label="Close",
+		# 								command=self.bell)	 
 
 		# To create a line in the dialog		 
 		self.__thisFileMenu.add_separator()										 
@@ -113,15 +117,14 @@ class Notepad:
 		
 		# Scrollbar will adjust automatically according to the content		 
 		self.__thisScrollBar.config(command=self.__thisTextArea.yview)	 
-		self.__thisTextArea.config(yscrollcommand=self.__thisScrollBar.set) 
-	
+		self.__thisTextArea.config(yscrollcommand=self.__thisScrollBar.set)
 		
 	def __quitApplication(self): 
 		self.__root.destroy() 
 		# exit() 
 
 	def __showAbout(self): 
-		showinfo("Notepad","Avinash Kumar") 
+		showinfo("Notepad","This editor can be used as notepad. By Avinash Kumar") 
 
 	def __openFile(self): 
 		
@@ -178,6 +181,9 @@ class Notepad:
 			file = open(self.__file,"w") 
 			file.write(self.__thisTextArea.get(1.0,END)) 
 			file.close() 
+			
+	def answer():
+		showerror("Answer", "Sorry, no answer available")
 
 	def __cut(self): 
 		self.__thisTextArea.event_generate("<<Cut>>") 
