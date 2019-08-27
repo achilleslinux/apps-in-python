@@ -1,77 +1,42 @@
-import tkinter 
-import os	 
 from tkinter import *
-from tkinter.messagebox import *
-from tkinter.filedialog import *
+from tkinter.colorchooser import askcolor
 
-class Notepad: 
 
-	__root = Tk() 
+class Paint(object):
 
-	# default window width and height 
-	__thisWidth = 300
-	__thisHeight = 300
-	__thisTextArea = Text(__root) 
-	__thisMenuBar = Menu(__root) 
-	__thisFileMenu = Menu(__thisMenuBar, tearoff=0) 
-	__thisEditMenu = Menu(__thisMenuBar, tearoff=0) 
-	__thisHelpMenu = Menu(__thisMenuBar, tearoff=0) 
-	
-	# To add scrollbar 
-	__thisScrollBar = Scrollbar(__thisTextArea)	 
-	__file = None
+    DEFAULT_PEN_SIZE = 5.0
+    DEFAULT_COLOR = 'black'
 
-	def __init__(self,**kwargs): 
+    def __init__(self):
+        self.root = Tk()
 
-		# Set icon 
-		try: 
-				self.__root.wm_iconbitmap("Notepad.ico") 
-		except: 
-				pass
+        self.pen_button = Button(self.root, text='pen', command=self.use_pen)
+        self.pen_button.grid(row=0, column=0)
 
-		# Set window size (the default is 300x300) 
+        self.brush_button = Button(self.root, text='brush', command=self.use_brush)
+        self.brush_button.grid(row=0, column=1)
 
-		try: 
-			self.__thisWidth = kwargs['width'] 
-		except KeyError: 
-			pass
+        self.color_button = Button(self.root, text='color', command=self.choose_color)
+        self.color_button.grid(row=0, column=2)
 
-		try: 
-			self.__thisHeight = kwargs['height'] 
-		except KeyError: 
-			pass
+        self.eraser_button = Button(self.root, text='eraser', command=self.use_eraser)
+        self.eraser_button.grid(row=0, column=3)
 
-		# Set the window text 
-		self.__root.title("Untitled - Notepad") 
+        self.choose_size_button = Scale(self.root, from_=1, to=50, orient=HORIZONTAL)
+        self.choose_size_button.grid(row=0, column=4)
 
-		# Center the window 
-		screenWidth = self.__root.winfo_screenwidth() 
-		screenHeight = self.__root.winfo_screenheight() 
-	
-		# For left-alling 
-		left = (screenWidth / 2) - (self.__thisWidth / 2) 
-		
-		# For right-allign 
-		top = (screenHeight / 2) - (self.__thisHeight /2) 
-		
-		# For top and bottom 
-		self.__root.geometry('%dx%d+%d+%d' % (self.__thisWidth, 
-											self.__thisHeight, 
-											left, top)) 
+        self.c = Canvas(self.root, bg='white', width=600, height=600)
+        self.c.grid(row=1, columnspan=5)
 
-		# To make the textarea auto resizable 
-		self.__root.grid_rowconfigure(0, weight=1) 
-		self.__root.grid_columnconfigure(0, weight=1) 
-
-		# Add controls (widget) 
-		self.__thisTextArea.grid(sticky = N + E + S+W) 
+        self.setup()
+        self.__thisTextArea.grid(sticky = N + E + S+W) 
 		
 		# To open new file 
-		self.__thisFileMenu.add_command(label="New", 
+        self.__thisFileMenu.add_command(label="New", 
 										command=self.__newFile)	 
 		
 		# To open a already existing file 
-		self.__thisFileMenu.add_command(label="Open", 
+        self.__thisFileMenu.add_command(label="Open", 
 										command=self.__openFile) 
 		
 		# To save current file 
@@ -199,9 +164,50 @@ class Notepad:
 		# Run main application 
 		self.__root.mainloop() 
 
+        self.root.mainloop()
+
+    def setup(self):
+        self.old_x = None
+        self.old_y = None
+        self.line_width = self.choose_size_button.get()
+        self.color = self.DEFAULT_COLOR
+        self.eraser_on = False
+        self.active_button = self.pen_button
+        self.c.bind('<B1-Motion>', self.paint)
+        self.c.bind('<ButtonRelease-1>', self.reset)
+
+    def use_pen(self):
+        self.activate_button(self.pen_button)
+
+    def use_brush(self):
+        self.activate_button(self.brush_button)
+
+    def choose_color(self):
+        self.eraser_on = False
+        self.color = askcolor(color=self.color)[1]
+
+    def use_eraser(self):
+        self.activate_button(self.eraser_button, eraser_mode=True)
+
+    def activate_button(self, some_button, eraser_mode=False):
+        self.active_button.config(relief=RAISED)
+        some_button.config(relief=SUNKEN)
+        self.active_button = some_button
+        self.eraser_on = eraser_mode
+
+    def paint(self, event):
+        self.line_width = self.choose_size_button.get()
+        paint_color = 'white' if self.eraser_on else self.color
+        if self.old_x and self.old_y:
+            self.c.create_line(self.old_x, self.old_y, event.x, event.y,
+                               width=self.line_width, fill=paint_color,
+                               capstyle=ROUND, smooth=TRUE, splinesteps=36)
+        self.old_x = event.x
+        self.old_y = event.y
+
+    def reset(self, event):
+        self.old_x, self.old_y = None, None
 
 
-
-# Run main application 
-notepad = Notepad(width=600,height=400) 
-notepad.run() 
+if __name__ == '__main__':
+    Paint()
